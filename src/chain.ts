@@ -17,6 +17,7 @@ export class Chain {
 
     addBlock(data: any) {
         const block = new Block(data, new Date(), this.getLatestBlock().hash);
+        block.mineBlock(4);
         this.blocks.push(block);
     }
 
