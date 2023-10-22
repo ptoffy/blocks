@@ -1,22 +1,24 @@
 import { Chain } from "./chain";
+import { Transaction } from "./transaction";
 
 const chain = new Chain();
-console.log(chain.isValid()); // true
 
-chain.addBlock("First Block");
-chain.addBlock("Second Block");
-chain.addBlock("Third Block");
+// Create some transactions
 
-console.log(chain.isValid()); // true
+// Normally, "address1" and "address2" are wallet addresses, or rather public keys
+chain.addTransaction(new Transaction('address1', 'address2', 100));
+chain.addTransaction(new Transaction('address2', 'address1', 50));
 
-chain.blocks[1].data = "Corrupted Data";
-console.log(chain.isValid()); // false
+// Mine block
+chain.minePendingTransactions('address3');
 
-chain.blocks[1].hash = chain.blocks[1].calculateHash();
-console.log(chain.isValid()); // false
+// This is going to be 0, since the pending transactions are not added to the blockchain yet
+// and the mining reward is not yet sent to the miner. 
+// For "address3" to have a balance, we need to mine another block
+console.log('Balance of address3 is ', chain.getBalanceOfAddress('address3')); // 0
 
-chain.blocks[1].previousBlockHash = chain.blocks[0].hash;
-console.log(chain.isValid()); // true
+// Mine another block to add the pending transactions to the blockchain
+// and send the mining reward to the miner
+chain.minePendingTransactions('address3');
 
-chain.blocks[1].hash = chain.blocks[1].calculateHash();
-console.log(chain.isValid()); // true
+console.log('Balance of address3 is ', chain.getBalanceOfAddress('address3')); // 100
