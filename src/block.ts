@@ -32,5 +32,16 @@ export class Block {
             this.nonce++;
             this.hash = this.calculateHash();
         }
+
+        console.log('Block mined: ' + this.hash);
+    }
+
+    /**
+     * Check if all transactions in the block are valid.
+     * 
+     * @returns {boolean}
+     */
+    public hasValidTransactions(): boolean {
+        return this.transactions.every(transaction => transaction.isValid());
     }
 }

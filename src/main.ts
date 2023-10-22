@@ -1,24 +1,34 @@
 import { Chain } from "./chain";
 import { Transaction } from "./transaction";
+import { ECDSA } from "./ecdsa";
+
+const ecdsa = ECDSA.getInstance();
+const ec = ecdsa.getEC();
+const keyPair = ec.genKeyPair();
+const walletAddress = keyPair.getPublic('hex');
 
 const chain = new Chain();
 
-// Create some transactions
+// Create a transaction
+const transaction = new Transaction(walletAddress, 'receiver-public-key', 10);
+// Sign the transaction
+transaction.signTransaction(keyPair);
 
-// Normally, "address1" and "address2" are wallet addresses, or rather public keys
-chain.addTransaction(new Transaction('address1', 'address2', 100));
-chain.addTransaction(new Transaction('address2', 'address1', 50));
+// Add the transaction to the chain
+chain.addTransaction(transaction);
 
-// Mine block
-chain.minePendingTransactions('address3');
+// Mine a block
+chain.minePendingTransactions(walletAddress);
 
-// This is going to be 0, since the pending transactions are not added to the blockchain yet
-// and the mining reward is not yet sent to the miner. 
-// For "address3" to have a balance, we need to mine another block
-console.log('Balance of address3 is ', chain.getBalanceOfAddress('address3')); // 0
+// Check if the chain is valid
+console.log('Is chain valid?', chain.isValid());
 
-// Mine another block to add the pending transactions to the blockchain
-// and send the mining reward to the miner
-chain.minePendingTransactions('address3');
+// This is going to be -10 because we sent 10 coins to the receiver but 
+// we haven't received any coins from the mining yet 
+console.log('Balance of wallet is', chain.getBalanceOfAddress(walletAddress)); // -10
 
-console.log('Balance of address3 is ', chain.getBalanceOfAddress('address3')); // 100
+// Let's try to tamper with the chain
+chain.blocks[1].transactions[0].amount = 1000;
+
+// Check if the chain is still valid
+console.log('Is chain valid?', chain.isValid()); 

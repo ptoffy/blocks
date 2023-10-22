@@ -48,6 +48,10 @@ export class Chain {
      * @param transaction The transaction to add.
      */
     addTransaction(transaction: Transaction) {
+        // Check if the transaction is valid
+        if (!transaction.isValid())
+            throw new Error('Cannot add invalid transaction to chain');
+
         this.pendingTransactions.push(transaction);
     }
 
@@ -83,12 +87,19 @@ export class Chain {
         for (let i = 1; i < this.blocks.length; i++) {
             const currentBlock = this.blocks[i];
             const previousBlock = this.blocks[i - 1];
-            if (currentBlock.hash !== currentBlock.calculateHash()) {
+
+            // Check if all transactions in the block are valid
+            if (!currentBlock.hasValidTransactions())
                 return false;
-            }
-            if (currentBlock.previousBlockHash !== previousBlock.hash) {
+
+            // Check if the hash of the block is valid
+            if (currentBlock.hash !== currentBlock.calculateHash())
                 return false;
-            }
+
+            // Check if the previousBlockHash of the current block matches the hash of the previous block
+            if (currentBlock.previousBlockHash !== previousBlock.hash)
+                return false;
+
         }
         return true;
     }
